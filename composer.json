@@ -1,0 +1,29 @@
+{
+    "name": "akuma/user-bundle",
+    "type": "symfony-bundle",
+    "description": "Akuma User Bundle",
+    "keywords": ["User Management"],
+    "homepage": "",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nikita Makarov",
+            "email": "mesaverde228@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4",
+        "symfony/symfony": "2.6.*",
+        "friendsofsymfony/user-bundle": "~1.3",
+        "doctrine/orm": "~2.2,>=2.2.3",
+        "doctrine/doctrine-bundle": "~1.2",
+        "akuma/core-bundle": "dev-master"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-0": { "Akuma\\Bundle\\UserBundle": "" }
+    },
+    "target-dir": "Akuma/Bundle/UserBundle"
+}
