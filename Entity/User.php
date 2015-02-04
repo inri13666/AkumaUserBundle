@@ -9,10 +9,12 @@
 namespace Akuma\Bundle\UserBundle\Entity;
 
 
-use Akuma\Bundle\UserBundle\Traits\EntityTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Doctrine\ORM\ORMException;
 use FOS\UserBundle\Model\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -147,10 +149,10 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
     protected $credentialsExpireAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Role", inversedBy="users", cascade="all")
+     * @ORM\ManyToMany(targetEntity="Role", inversedBy="users", cascade={"persist"})
      * @ORM\JoinTable(name="user_roles",
-     * joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id",)},
-     * inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="role")}
+     * joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="role", onDelete="CASCADE")}
      * )
      */
     protected $roles;
@@ -514,7 +516,6 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
      */
     public function getRole($role)
     {
-        var_dump(__METHOD__);die();
         foreach ($this->getRoles() as $roleItem) {
             if ($role == $roleItem->getRole()) {
                 return $roleItem;
@@ -530,7 +531,7 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
      */
     public function getRoles()
     {
-        return array_merge( $this->roles->toArray(), array( new Role( parent::ROLE_DEFAULT ) ) );
+        return $this->roles->toArray();
     }
 
     /**
@@ -552,6 +553,7 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
         }
 
         if (!$this->hasRole($_role->getRole())) {
+            $_role->addUser($this);
             $this->roles->add($_role);
         }
     }
@@ -589,11 +591,6 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
      */
     public function hasRole($role)
     {
-
-        if ($role === static::ROLE_DEFAULT) {
-            return true;
-        }
-
         $roles = $this->getRoles();
         /** @var Role $roleObject */
         foreach ($roles as $roleObject) {
@@ -612,11 +609,39 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
     public function persistRoles(LifecycleEventArgs $args)
     {
         $roles = $args->getObject()->getRoles();
+
+        $has_default_role = false;
+        /** @var EntityManager $em */
+        $em = $args->getObjectManager();
+
         foreach ($roles as $k => $role) {
-            if ($_ref = $args->getObjectManager()->getReference('AkumaUserBundle:Role', $role->getRole())) {
-                $roles[$k] = $_ref;
+            try {
+                $role_id = $role->getRole();
+                if ($role_id === static::ROLE_DEFAULT) {
+                    $has_default_role = true;
+                }
+
+                if ($em->find('AkumaUserBundle:Role', $role_id)) {
+                    $_ref = $em->getReference('AkumaUserBundle:Role', $role_id);
+                    if ($_ref) {
+                        $roles[$k] = $_ref;
+                    }
+                }
+            } catch (ORMException $e) {
+                continue;
             }
         }
+        if (!$has_default_role) {
+            if ($em->find('AkumaUserBundle:Role', static::ROLE_DEFAULT)) {
+                $_ref = $em->getReference('AkumaUserBundle:Role', static::ROLE_DEFAULT);
+                if ($_ref) {
+                    $roles[] = $_ref;
+                }
+            } else {
+                $roles[] = new Role(static::ROLE_DEFAULT);
+            }
+        }
+
         $args->getObject()->setRoles($roles);
     }
 
@@ -627,14 +652,53 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
      */
     public function updateRoles(PreUpdateEventArgs $args)
     {
+
         if ($args->hasChangedField('roles')) {
             $roles = $args->getObject()->getRoles();
+
+            $has_default_role = false;
+            /** @var EntityManager $em */
+            $em = $args->getObjectManager();
+
             foreach ($roles as $k => $role) {
-                if ($_ref = $args->getObjectManager()->getReference('AkumaUserBundle:Role', $role->getRole())) {
-                    $roles[$k] = $_ref;
+                try {
+                    $role_id = $role->getRole();
+                    if ($role_id === static::ROLE_DEFAULT) {
+                        $has_default_role = true;
+                    }
+
+                    if ($em->find('AkumaUserBundle:Role', $role_id)) {
+                        $_ref = $em->getReference('AkumaUserBundle:Role', $role_id);
+                        if ($_ref) {
+                            $roles[$k] = $_ref;
+                        }
+                    }
+                } catch (ORMException $e) {
+                    continue;
                 }
             }
+
+            if (!$has_default_role) {
+                if ($em->find('AkumaUserBundle:Role', static::ROLE_DEFAULT)) {
+                    $_ref = $em->getReference('AkumaUserBundle:Role', static::ROLE_DEFAULT);
+                    if ($_ref) {
+                        $roles[] = $_ref;
+                    }
+                } else {
+                    $roles[] = new Role(static::ROLE_DEFAULT);
+                }
+            }
+
             $args->setNewValue('roles', $roles);
         }
+//        if ($args->hasChangedField('roles')) {
+//            $roles = $args->getObject()->getRoles();
+//            foreach ($roles as $k => $role) {
+//                if ($_ref = $args->getObjectManager()->getReference('AkumaUserBundle:Role', $role->getRole())) {
+//                    $roles[$k] = $_ref;
+//                }
+//            }
+//            $args->setNewValue('roles', $roles);
+//        }
     }
 }

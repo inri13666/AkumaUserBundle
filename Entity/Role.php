@@ -49,6 +49,7 @@ class Role implements RoleInterface
         $this->users = new ArrayCollection();
 
         $this->role = $role;
+        $this->name = $role;
     }
 
     public function getName()
