@@ -14,10 +14,7 @@ use Symfony\Component\Security\Core\Role\RoleInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
- * @ORM\Table(name="role")
- *
- * @ORM\HasLifecycleCallbacks()
+ * @ORM\MappedSuperclass
  */
 class Role implements RoleInterface
 {
@@ -28,21 +25,21 @@ class Role implements RoleInterface
      *
      * @var string
      */
-    private $role;
+    protected $role;
 
     /**
      * @ORM\Column(name="name", type="string", length=30)
      *
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * @var ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="User", mappedBy="roles")
      */
-    private $users;
+    protected $users;
 
     public function __construct($role)
     {

@@ -19,10 +19,7 @@ use FOS\UserBundle\Model\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
- * @ORM\Table(name="users")
- *
- * @ORM\HasLifecycleCallbacks()
+ * @ORM\MappedSuperclass
  */
 class User extends \FOS\UserBundle\Model\User implements UserInterface
 {
