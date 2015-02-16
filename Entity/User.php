@@ -607,6 +607,9 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
     {
         $roles = $args->getObject()->getRoles();
 
+        $meta = $args->getObjectManager()->getClassMetadata(get_class($args->getObject()));
+        $roleClass = $meta->getAssociationTargetClass('roles');
+
         $has_default_role = false;
         /** @var EntityManager $em */
         $em = $args->getObjectManager();
@@ -618,8 +621,8 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
                     $has_default_role = true;
                 }
 
-                if ($em->find('AkumaUserBundle:Role', $role_id)) {
-                    $_ref = $em->getReference('AkumaUserBundle:Role', $role_id);
+                if ($em->find($roleClass, $role_id)) {
+                    $_ref = $em->getReference($roleClass, $role_id);
                     if ($_ref) {
                         $roles[$k] = $_ref;
                     }
@@ -629,13 +632,13 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
             }
         }
         if (!$has_default_role) {
-            if ($em->find('AkumaUserBundle:Role', static::ROLE_DEFAULT)) {
-                $_ref = $em->getReference('AkumaUserBundle:Role', static::ROLE_DEFAULT);
+            if ($em->find($roleClass, static::ROLE_DEFAULT)) {
+                $_ref = $em->getReference($roleClass, static::ROLE_DEFAULT);
                 if ($_ref) {
                     $roles[] = $_ref;
                 }
             } else {
-                $roles[] = new Role(static::ROLE_DEFAULT);
+                $roles[] = new $roleClass(static::ROLE_DEFAULT);
             }
         }
 
@@ -653,6 +656,9 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
         if ($args->hasChangedField('roles')) {
             $roles = $args->getObject()->getRoles();
 
+            $meta = $args->getObjectManager()->getClassMetadata(get_class($args->getObject()));
+            $roleClass = $meta->getAssociationTargetClass('roles');
+
             $has_default_role = false;
             /** @var EntityManager $em */
             $em = $args->getObjectManager();
@@ -664,8 +670,8 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
                         $has_default_role = true;
                     }
 
-                    if ($em->find('AkumaUserBundle:Role', $role_id)) {
-                        $_ref = $em->getReference('AkumaUserBundle:Role', $role_id);
+                    if ($em->find($roleClass, $role_id)) {
+                        $_ref = $em->getReference($roleClass, $role_id);
                         if ($_ref) {
                             $roles[$k] = $_ref;
                         }
@@ -676,26 +682,17 @@ class User extends \FOS\UserBundle\Model\User implements UserInterface
             }
 
             if (!$has_default_role) {
-                if ($em->find('AkumaUserBundle:Role', static::ROLE_DEFAULT)) {
-                    $_ref = $em->getReference('AkumaUserBundle:Role', static::ROLE_DEFAULT);
+                if ($em->find($roleClass, static::ROLE_DEFAULT)) {
+                    $_ref = $em->getReference($roleClass, static::ROLE_DEFAULT);
                     if ($_ref) {
                         $roles[] = $_ref;
                     }
                 } else {
-                    $roles[] = new Role(static::ROLE_DEFAULT);
+                    $roles[] = new $roleClass(static::ROLE_DEFAULT);
                 }
             }
 
             $args->setNewValue('roles', $roles);
         }
-//        if ($args->hasChangedField('roles')) {
-//            $roles = $args->getObject()->getRoles();
-//            foreach ($roles as $k => $role) {
-//                if ($_ref = $args->getObjectManager()->getReference('AkumaUserBundle:Role', $role->getRole())) {
-//                    $roles[$k] = $_ref;
-//                }
-//            }
-//            $args->setNewValue('roles', $roles);
-//        }
     }
 }
