@@ -1,29 +1,33 @@
 {
-    "name": "akuma/user-bundle",
-    "type": "symfony-bundle",
-    "description": "Akuma User Bundle",
-    "keywords": ["User Management"],
-    "homepage": "",
-    "license": "MIT",
-    "authors": [
+    "name"             : "akuma/user-bundle",
+    "type"             : "symfony-bundle",
+    "description"      : "Akuma User Bundle",
+    "keywords"         : ["User Management"],
+    "homepage"         : "",
+    "license"          : "MIT",
+    "authors"          : [
         {
-            "name": "Nikita Makarov",
+            "name" : "Nikita Makarov",
             "email": "mesaverde228@gmail.com"
         }
     ],
     "minimum-stability": "dev",
-    "require": {
-        "php": ">=5.4",
-        "symfony/symfony": "2.6.*",
+    "require"          : {
+        "php"                         : ">=5.4",
         "friendsofsymfony/user-bundle": "~1.3",
-        "doctrine/orm": "~2.2,>=2.2.3",
-        "doctrine/doctrine-bundle": "~1.2",
-        "akuma/core-bundle": "dev-master"
+        "akuma/core-bundle"           : "dev-master"
     },
-    "require-dev": {
+    "require-dev"      : {
     },
-    "autoload": {
-        "psr-0": { "Akuma\\Bundle\\UserBundle": "" }
+    "autoload"         : {
+        "psr-0": {
+            "Akuma\\Bundle\\UserBundle": ""
+        }
     },
-    "target-dir": "Akuma/Bundle/UserBundle"
+    "target-dir"       : "Akuma/Bundle/UserBundle",
+    "extra"            : {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
 }
